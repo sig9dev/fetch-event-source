@@ -74,19 +74,19 @@ export function fetchEventSource(input: RequestInfo, {
         let curRequestController: AbortController;
         function onVisibilityChange() {
             curRequestController.abort(); // close existing request on every visibility change
-            if (!document.hidden) {
+            if (typeof document !== "undefined" && !document.hidden) {
                 create(); // page is now visible again, recreate request.
             }
         }
 
         if (!openWhenHidden) {
-            document.addEventListener('visibilitychange', onVisibilityChange);
+            typeof document !== "undefined" && document.addEventListener('visibilitychange', onVisibilityChange);
         }
 
         let retryInterval = DefaultRetryInterval;
         let retryTimer = 0;
         function dispose() {
-            document.removeEventListener('visibilitychange', onVisibilityChange);
+            typeof document !== "undefined" && document.removeEventListener('visibilitychange', onVisibilityChange);
             window.clearTimeout(retryTimer);
             curRequestController.abort();
         }
