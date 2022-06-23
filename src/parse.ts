@@ -20,10 +20,25 @@ export interface EventSourceMessage {
  * @returns {Promise<void>} A promise that will be resolved when the stream closes.
  */
 export async function getBytes(stream: ReadableStream<Uint8Array>, onChunk: (arr: Uint8Array) => void) {
-    const reader = stream.getReader();
+    // create a reader for stream
+
+    // node stream does not have getReader, use an alternative method
+    if (typeof stream.getReader !== 'function') {
+       return await getBytes2(stream, onChunk);
+    }
+
+    const reader = stream.getReader();   
+
     let result: ReadableStreamDefaultReadResult<Uint8Array>;
     while (!(result = await reader.read()).done) {
         onChunk(result.value);
+    }
+}
+
+// This works on node 14 + presumably
+async function getBytes2(stream: any, onChunk: (arr: Uint8Array) => void) {
+    for await (const chunk of stream) {
+        onChunk(chunk);
     }
 }
 

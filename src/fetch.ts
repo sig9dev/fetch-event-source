@@ -4,7 +4,7 @@ export const EventStreamContentType = 'text/event-stream';
 
 const DefaultRetryInterval = 1000;
 const LastEventId = 'last-event-id';
-
+type Timer = ReturnType<typeof setTimeout>
 export interface FetchEventSourceInit extends RequestInit {
     /**
      * The request headers. FetchEventSource only supports the Record<string,string> format.
@@ -84,10 +84,10 @@ export function fetchEventSource(input: RequestInfo, {
         }
 
         let retryInterval = DefaultRetryInterval;
-        let retryTimer = 0;
+        let retryTimer : Timer = 0;
         function dispose() {
             typeof document !== "undefined" && document.removeEventListener('visibilitychange', onVisibilityChange);
-            window.clearTimeout(retryTimer);
+            clearTimeout(retryTimer);
             curRequestController.abort();
         }
 
@@ -131,8 +131,9 @@ export function fetchEventSource(input: RequestInfo, {
                     try {
                         // check if we need to retry:
                         const interval: any = onerror?.(err) ?? retryInterval;
-                        window.clearTimeout(retryTimer);
-                        retryTimer = window.setTimeout(create, interval);
+                        clearTimeout(retryTimer);
+                        retryTimer = setTimeout(create, interval);
+
                     } catch (innerErr) {
                         // we should not retry anymore:
                         dispose();
