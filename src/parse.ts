@@ -27,9 +27,9 @@ export async function getBytes(stream: ReadableStream<Uint8Array>, onChunk: (arr
        return await getBytes2(stream, onChunk);
     }
 
-    const reader = stream.getReader();   
+    const reader = stream.getReader();
 
-    let result: ReadableStreamDefaultReadResult<Uint8Array>;
+    let result: ReadableStreamReadResult<Uint8Array>;
     while (!(result = await reader.read()).done) {
         onChunk(result.value);
     }
@@ -49,9 +49,9 @@ const enum ControlChars {
     Colon = 58,
 }
 
-/** 
+/**
  * Parses arbitary byte chunks into EventSource line buffers.
- * Each line should be of the format "field: value" and ends with \r, \n, or \r\n. 
+ * Each line should be of the format "field: value" and ends with \r, \n, or \r\n.
  * @param onLine A function that will be called on each new EventSource line.
  * @returns A function that should be called for each incoming byte chunk.
  */
@@ -79,10 +79,10 @@ export function getLines(onLine: (line: Uint8Array, fieldLength: number) => void
                 if (buffer[position] === ControlChars.NewLine) {
                     lineStart = ++position; // skip to next char
                 }
-                
+
                 discardTrailingNewline = false;
             }
-            
+
             // start looking forward till the end of line:
             let lineEnd = -1; // index of the \r or \n char
             for (; position < bufLength && lineEnd === -1; ++position) {
@@ -124,7 +124,7 @@ export function getLines(onLine: (line: Uint8Array, fieldLength: number) => void
     }
 }
 
-/** 
+/**
  * Parses line buffers into EventSourceMessages.
  * @param onId A function that will be called on each `id` field.
  * @param onRetry A function that will be called on each `retry` field.
@@ -158,7 +158,7 @@ export function getMessages(
                     // otherwise, just set to the new value:
                     message.data = message.data
                         ? message.data + '\n' + value
-                        : value; // otherwise, 
+                        : value; // otherwise,
                     break;
                 case 'event':
                     message.event = value;
